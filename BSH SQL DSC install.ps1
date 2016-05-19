@@ -12,7 +12,7 @@ Configuration SQLSA
     foreach($Role in $Roles)
     {
         $Servers = @($AllNodes.Where{$_.Roles | Where-Object {$_ -eq $Role}}.NodeName)
-        Set-Variable -Name ($Role.Replace(" ","").Replace(".","") ) -Value $Servers
+        Set-Variable -Name ($Role.Replace(' ','').Replace('.','') ) -Value $Servers
     } 
 
     Node $AllNodes.NodeName
@@ -32,11 +32,11 @@ Configuration SQLSA
 
         )
         {
-            WindowsFeature "NET-Framework-Core"
+            WindowsFeature 'NET-Framework-Core'
             {
-                Ensure = "Present"
-                Name = "NET-Framework-Core"
-                Source = $Node.SourcePath + "\WindowsServer2012R2\sources\sxs"
+                Ensure = 'Present'
+                Name = 'NET-Framework-Core'
+                Source = $Node.SourcePath + '\WindowsServer2012R2\sources\sxs'
             }
         }
 
@@ -58,7 +58,7 @@ Configuration SQLSA
                  DiskNumber = 2
                  DriveLetter = 'D'
                  AllocationUnitSize = 64kb
-                 DependsOn = "[xWaitforDisk]Disk2"
+                 DependsOn = '[xWaitforDisk]Disk2'
             }
 
             xWaitforDisk Disk3
@@ -72,7 +72,7 @@ Configuration SQLSA
                  DiskNumber = 3
                  DriveLetter = 'E'
                  AllocationUnitSize = 64kb
-                 DependsOn = "[xWaitforDisk]Disk3"
+                 DependsOn = '[xWaitforDisk]Disk3'
             }
 
             xWaitforDisk Disk4
@@ -86,7 +86,7 @@ Configuration SQLSA
                  DiskNumber = 3
                  DriveLetter = 'F'
                  AllocationUnitSize = 64kb
-                 DependsOn = "[xWaitforDisk]Disk4"
+                 DependsOn = '[xWaitforDisk]Disk4'
             }
 
             xWaitforDisk Disk5
@@ -100,7 +100,7 @@ Configuration SQLSA
                  DiskNumber = 3
                  DriveLetter = 'T'
                  AllocationUnitSize = 64kb
-                 DependsOn = "[xWaitforDisk]Disk5"
+                 DependsOn = '[xWaitforDisk]Disk5'
             }
 
             foreach($SQLServer in $Node.SQLServers)
@@ -110,14 +110,14 @@ Configuration SQLSA
                 xSqlServerSetup ($Node.NodeName + $SQLInstanceName)
                 {
                     DependsOn = @(
-                                    "[WindowsFeature]NET-Framework-Core"
-                                    "[xDisk]DVolume"
-                                    "[xDisk]EVolume"
-                                    "[xDisk]FVolume"
-                                    "[xDisk]TVolume"
+                                    '[WindowsFeature]NET-Framework-Core'
+                                    '[xDisk]DVolume'
+                                    '[xDisk]EVolume'
+                                    '[xDisk]FVolume'
+                                    '[xDisk]TVolume'
                                 )
                     SourcePath = $Node.SourcePath
-                    SourceFolder = "SQLServer2012.en"
+                    SourceFolder = 'SQLServer2012.en'
                     SetupCredential = $Node.InstallerServiceAccount
                     InstanceName = $SQLInstanceName
                     Features = $sqlServer.Features
@@ -129,23 +129,23 @@ Configuration SQLSA
 
                     SQLSysAdminAccounts = $Node.SQLAdmins
 
-                    InstallSharedDir = "C:\Program Files\Microsoft SQL Server"
-                    INSTALLSHAREDWOWDIR = "C:\Program Files (x86)\Microsoft SQL Server"
+                    InstallSharedDir = 'C:\Program Files\Microsoft SQL Server'
+                    INSTALLSHAREDWOWDIR = 'C:\Program Files (x86)\Microsoft SQL Server'
 
-                    INSTANCEDIR = "C:\Program Files\Microsoft SQL Server"
-                    INSTALLSQLDATADIR = "D:\"
+                    INSTANCEDIR = 'C:\Program Files\Microsoft SQL Server'
+                    INSTALLSQLDATADIR = 'D:\'
 
-                    SQLBACKUPDIR = "F:\SQLDumps"
+                    SQLBACKUPDIR = 'F:\SQLDumps'
 
-                    SQLTempDBLogDir = "E:\sqlLogs"
-                    SQLTEMPDBDIR = "t:\sqldb"
+                    SQLTempDBLogDir = 'E:\sqlLogs'
+                    SQLTEMPDBDIR = 't:\sqldb'
 
-                    SQLUserDBDir = "d:\sqldb"
-                    SQLUserDBLogDir = "E:\sqlLogs"
+                    SQLUserDBDir = 'd:\sqldb'
+                    SQLUserDBLogDir = 'E:\sqlLogs'
 
-                    SQLCollation = "SQL_Latin1_General_CP1_CI_AS"
+                    SQLCollation = 'SQL_Latin1_General_CP1_CI_AS'
                     
-                    UpdateEnabled = "True"
+                    UpdateEnabled = 'True'
                     UpdateSource = $node.UpdateSource
 
                     PID = $Node.PID
@@ -153,35 +153,35 @@ Configuration SQLSA
 
                 xSQLServerPowerPlan ($Node.NodeName + $SQLInstanceName)
                 {
-                    DependsOn = ("[xSqlServerSetup]" + $Node.NodeName + $SQLInstanceName)
-                    Ensure = "Present"
+                    DependsOn = ('[xSqlServerSetup]' + $Node.NodeName + $SQLInstanceName)
+                    Ensure = 'Present'
                 }
     
                 xSqlServerMemory  ($Node.NodeName + $SQLInstanceName)
                 {
-                    DependsOn = ("[xSqlServerSetup]" + $Node.NodeName + $SQLInstanceName)
-                    Ensure = "Present"
+                    DependsOn = ('[xSqlServerSetup]' + $Node.NodeName + $SQLInstanceName)
+                    Ensure = 'Present'
                     DynamicAlloc = $true
                 }
                 
                 xSQLServerMaxDop  ($Node.NodeName + $SQLInstanceName)
                 {
-                    Ensure = "Present"
+                    Ensure = 'Present'
                     DynamicAlloc = $true
-                    DependsOn = ("[xSqlServerSetup]" + $Node.NodeName + $SQLInstanceName)
+                    DependsOn = ('[xSqlServerSetup]' + $Node.NodeName + $SQLInstanceName)
                 }
                 xSQLServerNetwork ($Node.NodeName + $SQLInstanceName)
                 {
-                    DependsOn = ("[xSqlServerSetup]" + $Node.NodeName + $SQLInstanceName)
+                    DependsOn = ('[xSqlServerSetup]' + $Node.NodeName + $SQLInstanceName)
                     InstanceName = $sqlInstanceName
-                    ProtocolName = "tcp"
+                    ProtocolName = 'tcp'
                     IsEnabled = $true
                     RestartService = $true 
                 }   
 
                 xSQLDatabaseRecoveryModel($Node.NodeName + $SQLInstanceName)
                 {
-                    DependsOn = ("[xSqlServerSetup]" + $Node.NodeName + $SQLInstanceName)
+                    DependsOn = ('[xSqlServerSetup]' + $Node.NodeName + $SQLInstanceName)
                     sqlServerInstance = "$($Node.NodeName)\$SQLInstanceName" 
                     DatabaseName='Model'
                     RecoveryModel='Simple'
@@ -189,9 +189,9 @@ Configuration SQLSA
                
                 xSqlServerFirewall ($Node.NodeName + $SQLInstanceName)
                 {
-                    DependsOn = ("[xSqlServerSetup]" + $Node.NodeName + $SQLInstanceName)
+                    DependsOn = ('[xSqlServerSetup]' + $Node.NodeName + $SQLInstanceName)
                     SourcePath = $Node.SourcePath
-                    SourceFolder = "SQLServer2012.en"
+                    SourceFolder = 'SQLServer2012.en'
                     InstanceName = $SQLInstanceName
                     Features = $sqlServer.Features
                 }
@@ -202,16 +202,16 @@ Configuration SQLSA
         # Install SQL Management Tools
         if($SQL2012ManagementTools | Where-Object {$_ -eq $Node.NodeName})
         {
-            xSqlServerSetup "SQLMT"
+            xSqlServerSetup 'SQLMT'
             {
                 DependsOn = @(
-                                "[WindowsFeature]NET-Framework-Core"
+                                '[WindowsFeature]NET-Framework-Core'
                             )
                 SourcePath = $Node.SourcePath
-                SourceFolder = "SQLServer2012.en"
+                SourceFolder = 'SQLServer2012.en'
                 SetupCredential = $Node.InstallerServiceAccount
-                InstanceName = "NULL"
-                Features = "SSMS,ADV_SSMS"
+                InstanceName = 'NULL'
+                Features = 'SSMS,ADV_SSMS'
             }
         }
 
@@ -232,7 +232,7 @@ Configuration SQLSA
                  DiskNumber = 1
                  DriveLetter = 'D'
                  AllocationUnitSize = 64kb
-                 DependsOn = "[xWaitforDisk]Disk1"
+                 DependsOn = '[xWaitforDisk]Disk1'
             }
 
             xWaitforDisk Disk2
@@ -246,7 +246,7 @@ Configuration SQLSA
                  DiskNumber = 2
                  DriveLetter = 'E'
                  AllocationUnitSize = 64kb
-                 DependsOn = "[xWaitforDisk]Disk2"
+                 DependsOn = '[xWaitforDisk]Disk2'
             }
 
             xWaitforDisk Disk3
@@ -260,7 +260,7 @@ Configuration SQLSA
                  DiskNumber = 3
                  DriveLetter = 'F'
                  AllocationUnitSize = 64kb
-                 DependsOn = "[xWaitforDisk]Disk3"
+                 DependsOn = '[xWaitforDisk]Disk3'
             }
 
             xWaitforDisk Disk4
@@ -274,7 +274,7 @@ Configuration SQLSA
                  DiskNumber = 4
                  DriveLetter = 'T'
                  AllocationUnitSize = 64kb
-                 DependsOn = "[xWaitforDisk]Disk4"
+                 DependsOn = '[xWaitforDisk]Disk4'
             }
 
 
@@ -285,14 +285,14 @@ Configuration SQLSA
                 xSqlServerSetup ($Node.NodeName + $SQLInstanceName)
                 {
                     DependsOn = @(
-                                    "[WindowsFeature]NET-Framework-Core"
-                                    "[xDisk]DVolume"
-                                    "[xDisk]EVolume"
-                                    "[xDisk]FVolume"
-                                    "[xDisk]TVolume"
+                                    '[WindowsFeature]NET-Framework-Core'
+                                    '[xDisk]DVolume'
+                                    '[xDisk]EVolume'
+                                    '[xDisk]FVolume'
+                                    '[xDisk]TVolume'
                                 )
                     SourcePath = $Node.SourcePath
-                    SourceFolder = "SQLServer2014.en"
+                    SourceFolder = 'SQLServer2014.en'
                     SetupCredential = $Node.InstallerServiceAccount
                     InstanceName = $SQLInstanceName
                     Features = $sqlServer.Features
@@ -304,23 +304,23 @@ Configuration SQLSA
 
                     SQLSysAdminAccounts = $Node.SQLAdmins
 
-                    InstallSharedDir = "C:\Program Files\Microsoft SQL Server"
-                    INSTALLSHAREDWOWDIR = "C:\Program Files (x86)\Microsoft SQL Server"
+                    InstallSharedDir = 'C:\Program Files\Microsoft SQL Server'
+                    INSTALLSHAREDWOWDIR = 'C:\Program Files (x86)\Microsoft SQL Server'
 
-                    INSTANCEDIR = "C:\Program Files\Microsoft SQL Server"
-                    INSTALLSQLDATADIR = "D:\"
+                    INSTANCEDIR = 'C:\Program Files\Microsoft SQL Server'
+                    INSTALLSQLDATADIR = 'D:\'
 
-                    SQLBACKUPDIR = "F:\SQLDumps"
+                    SQLBACKUPDIR = 'F:\SQLDumps'
 
-                    SQLTempDBLogDir = "E:\sqlLogs"
-                    SQLTEMPDBDIR = "t:\sqldb"
+                    SQLTempDBLogDir = 'E:\sqlLogs'
+                    SQLTEMPDBDIR = 't:\sqldb'
 
-                    SQLUserDBDir = "d:\sqldb"
-                    SQLUserDBLogDir = "E:\sqlLogs"
+                    SQLUserDBDir = 'd:\sqldb'
+                    SQLUserDBLogDir = 'E:\sqlLogs'
 
-                    SQLCollation = "SQL_Latin1_General_CP1_CI_AS"
+                    SQLCollation = 'SQL_Latin1_General_CP1_CI_AS'
                     
-                    UpdateEnabled = "True"
+                    UpdateEnabled = 'True'
                     UpdateSource = $node.UpdateSource
 
                     PID = $Node.PID
@@ -328,44 +328,44 @@ Configuration SQLSA
 
                 xSQLServerPowerPlan ($Node.NodeName + $SQLInstanceName)
                 {
-                    Ensure = "Present"
+                    Ensure = 'Present'
                 }
     
                 xSqlServerMemory  ($Node.NodeName + $SQLInstanceName)
                 {
-                    DependsOn = ("[xSqlServerSetup]" + $Node.NodeName + $SQLInstanceName)
-                    Ensure = "Present"
+                    DependsOn = ('[xSqlServerSetup]' + $Node.NodeName + $SQLInstanceName)
+                    Ensure = 'Present'
                     DynamicAlloc = $true
                 }
                 
                 xSQLServerMaxDop($Node.Nodename)
                 {
-                    Ensure = "Present"
+                    Ensure = 'Present'
                     DynamicAlloc = $true
-                    DependsOn = ("[xSqlServerSetup]" + $Node.NodeName + $SQLInstanceName)
+                    DependsOn = ('[xSqlServerSetup]' + $Node.NodeName + $SQLInstanceName)
                 }
 
                 xSQLServerNetwork ($Node.NodeName + $SQLInstanceName)
                 {
-                    DependsOn = ("[xSqlServerSetup]" + $Node.NodeName + $SQLInstanceName)
+                    DependsOn = ('[xSqlServerSetup]' + $Node.NodeName + $SQLInstanceName)
                     InstanceName = $sqlInstanceName
-                    ProtocolName = "tcp"
+                    ProtocolName = 'tcp'
                     IsEnabled = $true
                     RestartService = $true 
                 }   
 
                 xSqlServerFirewall ($Node.NodeName + $SQLInstanceName)
                 {
-                    DependsOn = ("[xSqlServerSetup]" + $Node.NodeName + $SQLInstanceName)
+                    DependsOn = ('[xSqlServerSetup]' + $Node.NodeName + $SQLInstanceName)
                     SourcePath = $Node.SourcePath
-                    SourceFolder = "SQLServer2014.en"
+                    SourceFolder = 'SQLServer2014.en'
                     InstanceName = $SQLInstanceName
                     Features = $sqlServer.Features
                 }
 
                 xSQLDatabaseRecoveryModel($Node.NodeName + $SQLInstanceName)
                 {
-                    DependsOn = ("[xSqlServerSetup]" + $Node.NodeName + $SQLInstanceName)
+                    DependsOn = ('[xSqlServerSetup]' + $Node.NodeName + $SQLInstanceName)
                     sqlServerInstance = "$($Node.NodeName)\$SQLInstanceName" 
                     DatabaseName='Model'
                     RecoveryModel='Simple'
@@ -378,53 +378,53 @@ Configuration SQLSA
         # Install SQL Management Tools
         if($SQL2014ManagementTools | Where-Object {$_ -eq $Node.NodeName})
         {
-            xSqlServerSetup "SQLMT"
+            xSqlServerSetup 'SQLMT'
             {
                 DependsOn = @(
-                                "[WindowsFeature]NET-Framework-Core"
+                                '[WindowsFeature]NET-Framework-Core'
                             )
                 SourcePath = $Node.SourcePath
-                SourceFolder = "SQLServer2014.en"
+                SourceFolder = 'SQLServer2014.en'
                 SetupCredential = $Node.InstallerServiceAccount
-                InstanceName = "NULL"
-                Features = "SSMS,ADV_SSMS"
+                InstanceName = 'NULL'
+                Features = 'SSMS,ADV_SSMS'
             }
         }
     }
 }
 
-$SecurePassword = ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force
-$LocalSystemAccount = New-Object System.Management.Automation.PSCredential ("SYSTEM", $SecurePassword)
+$SecurePassword = ConvertTo-SecureString -String 'P@ssw0rd' -AsPlainText -Force
+$LocalSystemAccount = New-Object System.Management.Automation.PSCredential ('SYSTEM', $SecurePassword)
 
-$SecurePassword = ConvertTo-SecureString -String "2TjxZkxGXnPjymUXxRFAVwG4" -AsPlainText -Force
-$InstallerServiceAccount = New-Object System.Management.Automation.PSCredential ("SLLab\Installer", $SecurePassword)
+$SecurePassword = ConvertTo-SecureString -String '2TjxZkxGXnPjymUXxRFAVwG4' -AsPlainText -Force
+$InstallerServiceAccount = New-Object System.Management.Automation.PSCredential ('SLLab\Installer', $SecurePassword)
 
-$SecurePassword = ConvertTo-SecureString -String "quVYE8zJVQCjPScnYxtUDQt9" -AsPlainText -Force
-$SQLServiceAccount = New-Object System.Management.Automation.PSCredential ("SLLab\SQL-SVC", $SecurePassword)
+$SecurePassword = ConvertTo-SecureString -String 'quVYE8zJVQCjPScnYxtUDQt9' -AsPlainText -Force
+$SQLServiceAccount = New-Object System.Management.Automation.PSCredential ('SLLab\SQL-SVC', $SecurePassword)
 
-$SecurePassword = ConvertTo-SecureString -String "quVYE8zJVQCjPScnYxtUDQt9" -AsPlainText -Force
-$SQLAgtServiceAccount = New-Object System.Management.Automation.PSCredential ("SLLab\SQL-SVC", $SecurePassword)
+$SecurePassword = ConvertTo-SecureString -String 'quVYE8zJVQCjPScnYxtUDQt9' -AsPlainText -Force
+$SQLAgtServiceAccount = New-Object System.Management.Automation.PSCredential ('SLLab\SQL-SVC', $SecurePassword)
 
-$SecurePassword = ConvertTo-SecureString -String "PFd_otm00n!" -AsPlainText -Force
-$SQLSAAccount = New-Object System.Management.Automation.PSCredential ("SA", $SecurePassword)
+$SecurePassword = ConvertTo-SecureString -String 'PFd_otm00n!' -AsPlainText -Force
+$SQLSAAccount = New-Object System.Management.Automation.PSCredential ('SA', $SecurePassword)
 
-$SQL2012StandardPID ="YFC4R-BRRWB-TVP9Y-6WJQ9-MCJQ7"
-$SQL2012EnterprisePID ="748RB-X4T6B-MRM7V-RTVFF-CHC8H"
-$SQL2012DeveloperPID = "YQWTX-G8T4R-QW4XX-BVH62-GP68Y"
-$SQL2014StandardPID ="P7FRV-Y6X6Y-Y8C6Q-TB4QR-DMTTK"
-$SQL2014DeveloperPID = ""
+$SQL2012StandardPID ='YFC4R-BRRWB-TVP9Y-6WJQ9-MCJQ7'
+$SQL2012EnterprisePID ='748RB-X4T6B-MRM7V-RTVFF-CHC8H'
+$SQL2012DeveloperPID = 'YQWTX-G8T4R-QW4XX-BVH62-GP68Y'
+$SQL2014StandardPID ='P7FRV-Y6X6Y-Y8C6Q-TB4QR-DMTTK'
+$SQL2014DeveloperPID = ''
 
 
 $ConfigurationData = @{
     AllNodes = @(
         @{
-            NodeName = "*"
+            NodeName = '*'
 
             SourcePath = "\\admin05\Installer$"
             InstallerServiceAccount = $InstallerServiceAccount
             LocalSystemAccount = $LocalSystemAccount
 
-            SecurityMode = "SQL"
+            SecurityMode = 'SQL'
             SAPwd = $SQLSAAccount
             PSDscAllowDomainUser = $true
 
@@ -432,24 +432,24 @@ $ConfigurationData = @{
 
         
         @{
-            NodeName = "sql06"
-            SQLAdmins = ("SLLab\SQL-Admins")
+            NodeName = 'sql06'
+            SQLAdmins = ('SLLab\SQL-Admins')
             SQLServiceAccount = $SQLServiceAccount 
             SqlAgtServiceAccount = $SQLAgtServiceAccount
             PID = $SQL2014StandardPID
-            UpdateSource = ".\updates"
+            UpdateSource = '.\updates'
 
             PSDscAllowPlainTextPassword = $true
             Roles = @(
-                "SQL 2014 Database Server"
+                'SQL 2014 Database Server'
             )
             SQLServers = @(
                 @{
-                    Features = "SQLENGINE,FULLTEXT,SSMS,ADV_SSMS"
+                    Features = 'SQLENGINE,FULLTEXT,SSMS,ADV_SSMS'
                     Roles = @(
-                        "SQL 2014 Database Server"
+                        'SQL 2014 Database Server'
                     )
-                    InstanceName = "MSSQLSERVER"
+                    InstanceName = 'MSSQLSERVER'
                 }
             )
         }
@@ -459,14 +459,14 @@ $ConfigurationData = @{
 
 foreach($Node in $ConfigurationData.AllNodes)
 {
-    if($Node.NodeName -ne "*")
+    if($Node.NodeName -ne '*')
     {
-        Start-Process -FilePath "robocopy.exe" -ArgumentList ("`"C:\Program Files\WindowsPowerShell\Modules`" `"\\" + $Node.NodeName + "\c$\Program Files\WindowsPowerShell\Modules`" /e /purge /xf") -NoNewWindow -Wait
+        Start-Process -FilePath 'robocopy.exe' -ArgumentList ("`"C:\Program Files\WindowsPowerShell\Modules`" `"\\" + $Node.NodeName + "\c$\Program Files\WindowsPowerShell\Modules`" /e /purge /xf") -NoNewWindow -Wait
 
     }
 }
 
-$ConfigurationPath = "D:\temp\sqlsa"
+$ConfigurationPath = 'D:\temp\sqlsa'
 
 if (test-path $ConfigurationPath) {Remove-item $ConfigurationPath -recurse -force}
 
@@ -480,7 +480,7 @@ Start-DscConfiguration -Path $ConfigurationPath -Verbose -Wait -Force
 
 foreach($Node in $ConfigurationData.AllNodes)
 {
-    if($Node.NodeName -ne "*")
+    if($Node.NodeName -ne '*')
     {
 #        Test-DscConfiguration -ComputerName $node.nodename -Verbose
 
